@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-String apiKey = "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";
+String apiKey = "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";
 
 class ApiServices {
   static String baseUrl = "https://api.openai.com/v1/chat/completions";
@@ -10,7 +10,7 @@ class ApiServices {
     'Authorization': 'Bearer $apiKey',
   };
 
-  static Future<String?> sendMessage(String? message) async {
+  static sendMessage(String? message) async {
     var res = await http.post(
       Uri.parse(baseUrl),
       headers: header,

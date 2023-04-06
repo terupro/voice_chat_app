@@ -4,6 +4,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 import 'package:voice_chat_app/api_services.dart';
 import 'package:voice_chat_app/chat_model.dart';
 import 'package:voice_chat_app/colors.dart';
+import 'package:voice_chat_app/text_to_speech.dart';
 
 class SpeechScreen extends StatefulWidget {
   const SpeechScreen({super.key});
@@ -61,13 +62,25 @@ class _SpeechScreenState extends State<SpeechScreen> {
             setState(() {
               isListening = false;
             });
-            speechToText.stop();
-
-            messages.add(ChatMessage(text: text, type: ChatMessageType.user));
-            var msg = await ApiServices.sendMessage(text);
-            setState(() {
-              messages.add(ChatMessage(text: msg, type: ChatMessageType.bot));
-            });
+            await speechToText.stop();
+            if (text.isNotEmpty &&
+                text != "Hold the button and start speaking") {
+              messages.add(ChatMessage(text: text, type: ChatMessageType.user));
+              var msg = await ApiServices.sendMessage(text);
+              msg = msg?.trim();
+              setState(() {
+                messages.add(ChatMessage(text: msg, type: ChatMessageType.bot));
+              });
+              Future.delayed(const Duration(milliseconds: 500), () {
+                TextToSpeech.speak(msg!);
+              });
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Failed to process. Tly again!"),
+                ),
+              );
+            }
           },
           child: CircleAvatar(
             backgroundColor: bgColor,
@@ -105,8 +118,9 @@ class _SpeechScreenState extends State<SpeechScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                    color: chatBgColor,
-                    borderRadius: BorderRadius.circular(12)),
+                  color: chatBgColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: ListView.builder(
                   physics: const BouncingScrollPhysics(),
                   shrinkWrap: true,
